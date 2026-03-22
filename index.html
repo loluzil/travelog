@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YehiaXX B5</title>
+<meta name="description" content="Personal trading performance dashboard">
+<meta name="theme-color" content="#090b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YehiaXX B5">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #090b10; --bg2: #0d1017; --bg3: #131720; --bg4: #181d28;
+    --border: rgba(255,255,255,0.05); --border2: rgba(255,255,255,0.09);
+    --accent: #ffffff; --accent-dim: rgba(255,255,255,0.06);
+    --gold: #ffffff; --gold2: #e0e0e0; --gold-dim: rgba(255,255,255,0.05);
+    --text: #f5f5f5; --text2: #888888; --text3: #444444;
+    --green: #3ddc84; --green-dim: rgba(61,220,132,0.1);
+    --red: #ff4d4d; --red-dim: rgba(255,77,77,0.1);
+    --radius: 12px; --radius-sm: 8px; --sidebar: 220px; --transition: 0.18s ease;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 14px; }
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: var(--sidebar); background: linear-gradient(180deg, #0e1119 0%, #090b10 100%); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .logo { padding: 26px 22px 22px; border-bottom: 1px solid var(--border); }
+  .logo-mark { display: flex; align-items: center; gap: 11px; }
+  .logo-icon { width: 36px; height: 36px; background: #1e1e1e; border: 1px solid var(--border2); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--text); flex-shrink: 0; letter-spacing: 0.03em; }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text); letter-spacing: 0.06em; line-height: 1; }
+  .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3px; font-weight: 400; }
+  .nav { padding: 18px 12px; flex: 1; }
+  .nav-label { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; padding: 0 10px; margin-bottom: 6px; margin-top: 14px; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; color: var(--text2); font-size: 14px; font-weight: 500; transition: all var(--transition); margin-bottom: 2px; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: var(--text); border-left: 2px solid var(--text); padding-left: 10px; }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .sidebar-footer { padding: 16px 22px; border-top: 1px solid var(--border); }
+  .sidebar-date { font-size: 11px; color: var(--text3); }
+
+  .main { flex: 1; overflow-y: auto; background: var(--bg); position: relative; }
+  .main::before { content: ''; position: fixed; top: 0; left: var(--sidebar); right: 0; bottom: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 70% 50% at 70% 10%, rgba(61,220,132,0.04) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 20% 80%, rgba(255,77,77,0.04) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 50% 50%, rgba(30,60,120,0.08) 0%, transparent 70%); }
+  .page { position: relative; z-index: 1; }
+  .page { display: none; padding: 34px 36px; }
+  .page.active { display: block; }
+  .page-header { margin-bottom: 30px; }
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.06em; color: var(--text); line-height: 1; }
+  .page-sub { font-size: 12.5px; color: var(--text3); margin-top: 5px; font-weight: 400; }
+
+  .balance-card { background: rgba(13,16,23,0.85); border: 1px solid var(--border2); border-radius: var(--radius); padding: 26px 30px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; border-left: 2px solid rgba(255,255,255,0.12); backdrop-filter: blur(4px); }
+  .balance-label { font-size: 10.5px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; font-weight: 600; }
+  .balance-amount { font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+  .balance-change { font-size: 12px; color: var(--text3); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+  .balance-change.pos { color: var(--green); }
+  .balance-change.neg { color: var(--red); }
+  .balance-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .amount-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 10px 14px; width: 150px; outline: none; transition: border-color var(--transition); }
+  .amount-input:focus { border-color: rgba(255,255,255,0.3); }
+  .amount-input::placeholder { color: var(--text3); }
+  .btn { padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition); font-family: 'Outfit', sans-serif; }
+  .btn-add { background: rgba(61,220,132,0.08); color: var(--green); border: 1px solid rgba(61,220,132,0.18); }
+  .btn-add:hover { background: rgba(61,220,132,0.15); }
+  .btn-sub { background: rgba(255,77,77,0.08); color: var(--red); border: 1px solid rgba(255,77,77,0.18); }
+  .btn-sub:hover { background: rgba(255,77,77,0.15); }
+
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.12em; color: var(--text2); margin-bottom: 14px; margin-top: 6px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: rgba(13,16,23,0.85); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; transition: border-color var(--transition); backdrop-filter: blur(4px); }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-label { font-size: 10.5px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 7px; font-weight: 600; }
+  .stat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text2); display: inline-block; }
+  .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 400; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
+  .stat-controls { display: flex; align-items: center; gap: 8px; }
+  .stat-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 10px; width: 95px; outline: none; transition: border-color var(--transition); }
+  .stat-input:focus { border-color: rgba(255,255,255,0.3); }
+  .btn-sm { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); transition: all var(--transition); font-family: 'Outfit', sans-serif; }
+  .btn-sm:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+
+  .winrate-card { background: rgba(13,16,23,0.85); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; display: flex; align-items: center; gap: 22px; transition: border-color var(--transition); backdrop-filter: blur(4px); }
+  .winrate-card:hover { border-color: var(--border2); }
+  .winrate-ring-wrap { position: relative; flex-shrink: 0; }
+  .winrate-ring { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #1c1c1c; stroke-width: 8; }
+  .ring-red { fill: none; stroke: var(--red); stroke-width: 8; stroke-linecap: butt; transition: stroke-dasharray 0.5s ease; }
+  .ring-green { fill: none; stroke: var(--green); stroke-width: 8; stroke-linecap: butt; transition: stroke-dasharray 0.5s ease; }
+  .winrate-pct-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: var(--text); text-align: center; pointer-events: none; }
+  .winrate-pct-label small { font-size: 9px; color: var(--text3); display: block; margin-top: 1px; }
+  .winrate-info { flex: 1; }
+  .winrate-controls { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+  .win-legend { margin-top: 10px; display: flex; gap: 14px; font-size: 11px; color: var(--text3); }
+  .win-legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+  .divider { height: 1px; background: var(--border); margin: 30px 0; }
+
+  .journal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .month-nav { display: flex; align-items: center; gap: 12px; }
+  .month-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.06em; color: var(--text); min-width: 170px; text-align: center; }
+  .btn-nav { width: 34px; height: 34px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+  .btn-nav:hover { color: var(--text); border-color: rgba(255,255,255,0.2); background: var(--bg4); }
+
+  .calendar-wrap { background: rgba(13,16,23,0.85); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; backdrop-filter: blur(4px); }
+  .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); }
+  .cal-day-header { text-align: center; font-size: 10.5px; color: var(--text3); letter-spacing: 0.08em; padding: 11px 0; text-transform: uppercase; font-weight: 600; }
+  .cal-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-day { background: transparent; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; align-items: flex-start; padding: 10px 12px; cursor: pointer; transition: background var(--transition); min-height: 90px; position: relative; }
+  .cal-day:nth-child(7n) { border-right: none; }
+  .cal-day:hover { background: var(--bg3); }
+  .cal-day.empty { cursor: default; pointer-events: none; }
+  .cal-day.today { background: rgba(255,255,255,0.04); border-top: 2px solid rgba(255,255,255,0.25); }
+  .cal-day.today:hover { background: rgba(255,255,255,0.07); }
+  .cal-day.day-green { background: rgba(46,204,113,0.08); border-top: 2px solid var(--green); }
+  .cal-day.day-green:hover { background: rgba(46,204,113,0.14); }
+  .cal-day.day-red { background: rgba(231,76,60,0.08); border-top: 2px solid var(--red); }
+  .cal-day.day-red:hover { background: rgba(231,76,60,0.14); }
+  .cal-day-num { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: var(--text2); line-height: 1; margin-bottom: 5px; }
+  .cal-day.today .cal-day-num { color: var(--text); font-weight: 700; }
+  .cal-day.day-green .cal-day-num { color: var(--green); }
+  .cal-day.day-red .cal-day-num { color: var(--red); }
+  .cal-day-preview { font-size: 10px; color: var(--text3); line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .cal-day-number { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text2); position: absolute; bottom: 10px; left: 12px; line-height: 1; }
+  .cal-day.day-green .cal-day-number { color: var(--green); }
+  .cal-day.day-red .cal-day-number { color: var(--red); }
+  .cal-day-color-dot { width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 10px; right: 10px; }
+  .day-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .btn-day-color { display: flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all var(--transition); font-family: 'Outfit', sans-serif; }
+  .btn-day-color.btn-green { background: rgba(46,204,113,0.1); color: var(--green); border-color: rgba(46,204,113,0.25); }
+  .btn-day-color.btn-green:hover, .btn-day-color.btn-green.active { background: rgba(46,204,113,0.2); border-color: var(--green); }
+  .btn-day-color.btn-red { background: rgba(231,76,60,0.1); color: var(--red); border-color: rgba(231,76,60,0.25); }
+  .btn-day-color.btn-red:hover, .btn-day-color.btn-red.active { background: rgba(231,76,60,0.2); border-color: var(--red); }
+  .btn-day-color.active { box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+  .day-number-wrap { display: flex; align-items: center; gap: 10px; }
+  .day-number-input { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 8px 12px; width: 130px; outline: none; transition: border-color var(--transition); }
+  .day-number-input:focus { border-color: rgba(255,255,255,0.3); }
+  .day-number-input::placeholder { color: var(--text3); font-family: 'Outfit', sans-serif; font-size: 12px; }
+  .day-number-label { font-size: 12px; color: var(--text3); }
+
+  .entry-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  .btn-back { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text2); padding: 9px 15px; cursor: pointer; font-size: 13px; font-family: 'Outfit', sans-serif; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all var(--transition); }
+  .btn-back:hover { color: var(--text); border-color: var(--text2); }
+  .entry-date-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--text); }
+  .entry-editor { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+  .editor-toolbar { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .tool-btn { padding: 4px 10px; border-radius: 5px; background: transparent; border: 1px solid transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 500; transition: all var(--transition); }
+  .tool-btn:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+  .editor-area { width: 100%; min-height: 200px; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; font-family: 'Outfit', sans-serif; font-weight: 400; line-height: 1.75; padding: 16px 18px; resize: vertical; }
+  .editor-area:empty::before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+
+  .image-upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 26px; text-align: center; cursor: pointer; transition: all var(--transition); background: var(--bg2); margin-bottom: 20px; }
+  .image-upload-zone:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.03); }
+  .upload-icon { font-size: 22px; margin-bottom: 7px; }
+  .upload-text { color: var(--text2); font-size: 13px; }
+  .upload-text span { color: var(--text); font-weight: 600; }
+  .upload-note { color: var(--text3); font-size: 11px; margin-top: 4px; }
+  #file-input { display: none; }
+
+  .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .image-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); background: var(--bg3); }
+  .image-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-delete { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.72); color: var(--red); border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--transition); }
+  .image-thumb:hover .img-delete { opacity: 1; }
+
+  .entry-save-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+  .btn-save { padding: 11px 24px; background: #ffffff; color: #080808; border: none; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all var(--transition); }
+  .btn-save:hover { background: #e0e0e0; }
+  .save-status { font-size: 12px; color: var(--text3); }
+  .save-status.saved { color: var(--green); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; color: var(--text); z-index: 9999; opacity: 0; transform: translateY(8px); transition: all 0.25s ease; pointer-events: none; font-family: 'Outfit', sans-serif; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 680px) {
+    .sidebar { width: 60px; }
+    .logo-text, .logo-sub, .nav-label, .nav-item span { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .page { padding: 20px 16px; }
+    .balance-card { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+<div>
+          <div class="logo-text">YehiaXX B5</div>
+          <div class="logo-sub">Performance</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Menu</div>
+      <div class="nav-item active">
+        <span class="nav-icon">◈</span>
+        <span>Dashboard</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-date" id="sidebar-date"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Track and manage your trading performance</div>
+      </div>
+
+      <div class="balance-card">
+        <div>
+          <div class="balance-label">Account Balance</div>
+          <div class="balance-amount" id="balance-display">$50,000.00</div>
+          <div class="balance-change" id="balance-change">+$0.00 from start</div>
+        </div>
+        <div class="balance-controls">
+          <input type="number" class="amount-input" id="balance-input" placeholder="Enter amount..." min="0" step="0.01">
+          <button class="btn btn-add" onclick="adjustBalance(1)">＋ Add</button>
+          <button class="btn btn-sub" onclick="adjustBalance(-1)">－ Subtract</button>
+        </div>
+      </div>
+
+      <div class="section-title">Performance Metrics</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label"><span class="stat-dot"></span>Number of Trades</div>
+          <div class="stat-value" id="trades-display">0</div>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <button onclick="addTrade('win')" style="flex:1;padding:9px 0;border-radius:var(--radius-sm);border:1px solid rgba(61,220,132,0.25);background:rgba(61,220,132,0.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all var(--transition);" onmouseover="this.style.background='rgba(61,220,132,0.16)'" onmouseout="this.style.background='rgba(61,220,132,0.08)'">+1 Win</button>
+            <button onclick="addTrade('loss')" style="flex:1;padding:9px 0;border-radius:var(--radius-sm);border:1px solid rgba(255,77,77,0.25);background:rgba(255,77,77,0.08);color:var(--red);font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all var(--transition);" onmouseover="this.style.background='rgba(255,77,77,0.16)'" onmouseout="this.style.background='rgba(255,77,77,0.08)'">+1 Loss</button>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:14px;font-size:11px;color:var(--text3);">
+            <span>W: <span id="wins-count" style="color:var(--green);font-weight:600;">0</span></span>
+            <span>L: <span id="losses-count" style="color:var(--red);font-weight:600;">0</span></span>
+            <button onclick="resetTrades()" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;padding:0;" onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">Reset</button>
+          </div>
+        </div>
+        <div class="stat-card" style="grid-column: span 1;">
+          <div class="stat-label"><span class="stat-dot"></span>Profit Factor</div>
+          <div class="stat-value" id="pf-display">0.00</div>
+          <div class="stat-controls" style="margin-bottom:10px;">
+            <input type="number" class="stat-input" id="pf-input" placeholder="Add value..." step="0.01">
+            <button class="btn-sm" onclick="setStat('pf')">Add</button>
+            <button class="btn-sm" onclick="resetPF()" style="color:var(--text3);">Reset</button>
+          </div>
+        </div>
+        <div class="winrate-card">
+          <div class="winrate-ring-wrap">
+            <svg class="winrate-ring" width="100" height="100" viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="40"/>
+              <circle class="ring-red" cx="50" cy="50" r="40" id="ring-red" stroke-dasharray="0 251.2"/>
+              <circle class="ring-green" cx="50" cy="50" r="40" id="ring-green" stroke-dasharray="0 251.2"/>
+            </svg>
+            <div class="winrate-pct-label"><span id="winrate-label">0%</span><small>Win Rate</small></div>
+          </div>
+          <div class="winrate-info">
+            <div class="stat-label"><span class="stat-dot"></span>Win Rate</div>
+            <div class="stat-value" id="wr-display">0%</div>
+            <div class="win-legend" style="margin-top:8px;">
+              <span><span class="legend-dot" style="background:var(--green);"></span>Win</span>
+              <span><span class="legend-dot" style="background:var(--red);"></span>Loss</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- JOURNAL -->
+      <div id="journal-view">
+        <div class="journal-top">
+          <div class="section-title" style="margin:0;">Trade Journal</div>
+          <div class="month-nav">
+            <button class="btn-nav" onclick="changeMonth(-1)">‹</button>
+            <div class="month-label" id="month-label"></div>
+            <button class="btn-nav" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="calendar-wrap">
+          <div class="cal-weekdays" id="cal-headers"></div>
+          <div class="cal-days-grid" id="cal-days"></div>
+        </div>
+      </div>
+
+      <div id="entry-view" style="display:none;">
+        <div class="entry-header">
+          <button class="btn-back" onclick="closeEntry()">← Back to Journal</button>
+          <div class="entry-date-title" id="entry-title"></div>
+        </div>
+        <div class="section-title" style="margin-bottom:12px;">Day Status</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:22px;">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Mark this trading day as a win or loss, and log a number (e.g. P&L, pips, R-multiple)</div>
+          <div class="day-status-row">
+            <button class="btn-day-color btn-green" id="btn-green" onclick="setDayColor('green')">
+              <span style="width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block;"></span> Green Day
+            </button>
+            <button class="btn-day-color btn-red" id="btn-red" onclick="setDayColor('red')">
+              <span style="width:9px;height:9px;border-radius:50%;background:var(--red);display:inline-block;"></span> Red Day
+            </button>
+            <button class="btn-sm" id="btn-clear-color" onclick="setDayColor(null)" style="font-size:12px;padding:8px 12px;">Clear</button>
+          </div>
+          <div class="day-number-wrap">
+            <input type="number" class="day-number-input" id="day-number-input" placeholder="Enter a number (P&L, pips...)" step="any">
+            <span class="day-number-label">Shown on calendar</span>
+          </div>
+        </div>
+        <div class="section-title">Notes & Analysis</div>
+        <div class="entry-editor">
+          <div class="editor-toolbar">
+            <button class="tool-btn" onclick="formatText('bold')"><b>B</b></button>
+            <button class="tool-btn" onclick="formatText('italic')"><i>I</i></button>
+            <button class="tool-btn" onclick="formatText('underline')"><u>U</u></button>
+            <span style="width:1px;height:16px;background:var(--border2);display:inline-block;margin:0 4px;"></span>
+            <button class="tool-btn" onclick="formatText('insertUnorderedList')">• List</button>
+            <button class="tool-btn" onclick="formatText('insertOrderedList')">1. List</button>
+          </div>
+          <div class="editor-area" id="entry-editor" contenteditable="true" data-placeholder="Write your trade analysis, thoughts, observations..."></div>
+        </div>
+        <div class="section-title">Trade Screenshots</div>
+        <div class="image-upload-zone" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">⊕</div>
+          <div class="upload-text"><span>Click to upload</span> or drag & drop</div>
+          <div class="upload-note">PNG, JPG, GIF, WEBP — max 5 MB each</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" multiple onchange="handleImages(event)">
+        <div class="images-grid" id="images-grid"></div>
+        <div class="entry-save-bar">
+          <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+          <span class="save-status" id="save-status"></span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const INITIAL = 50000;
+let state = { balance: INITIAL, trades: 0, wins: 0, losses: 0, pf: 0, pfHistory: [], wr: 0, journal: {} };
+let storageAvailable = false;
+try {
+  localStorage.setItem('__t__', '1'); localStorage.removeItem('__t__');
+  storageAvailable = true;
+  const saved = localStorage.getItem('yehiaxx_state');
+  if (saved) state = JSON.parse(saved);
+} catch(e) {}
+
+let currentEntryKey = null;
+const now = new Date();
+let viewYear = now.getFullYear();
+let viewMonth = now.getMonth();
+
+function save() {
+  if (!storageAvailable) return;
+  try { localStorage.setItem('yehiaxx_state', JSON.stringify(state)); } catch(e) {}
+}
+
+function adjustBalance(sign) {
+  const val = parseFloat(document.getElementById('balance-input').value);
+  if (isNaN(val) || val <= 0) { showToast('Enter a valid amount'); return; }
+  state.balance += sign * val;
+  document.getElementById('balance-input').value = '';
+  renderDashboard(); save();
+  showToast(sign > 0 ? '+$' + val.toFixed(2) + ' added' : '-$' + val.toFixed(2) + ' subtracted');
+}
+
+function renderDashboard() {
+  document.getElementById('balance-display').textContent = '$' + state.balance.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const diff = state.balance - INITIAL;
+  const el = document.getElementById('balance-change');
+  el.textContent = (diff >= 0 ? '+' : '') + '$' + Math.abs(diff).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' from start';
+  el.className = 'balance-change ' + (diff > 0 ? 'pos' : diff < 0 ? 'neg' : '');
+  document.getElementById('trades-display').textContent = state.trades;
+  const wEl = document.getElementById('wins-count');
+  const lEl = document.getElementById('losses-count');
+  if (wEl) wEl.textContent = state.wins || 0;
+  if (lEl) lEl.textContent = state.losses || 0;
+  document.getElementById('pf-display').textContent = parseFloat(state.pf).toFixed(2);
+  document.getElementById('wr-display').textContent = parseFloat(state.wr).toFixed(1) + '%';
+  renderRing(state.wr);
+}
+
+function setStat(type) {
+  if (type === 'pf') {
+    const v = parseFloat(document.getElementById('pf-input').value);
+    if (isNaN(v) || v < 0) { showToast('Enter a valid number'); return; }
+    if (!state.pfHistory) state.pfHistory = [];
+    if (state.pfHistory.length === 0) {
+      state.pf = v;
+    } else {
+      state.pf = (state.pf + v) / 2;
+    }
+    state.pfHistory.push(v);
+    document.getElementById('pf-input').value = '';
+    renderPFHistory();
+  }
+  renderDashboard(); save();
+}
+
+function renderRing(pct) {
+  const r = 40, circ = 2 * Math.PI * r;
+  const green = (pct / 100) * circ;
+  const red = circ - green;
+  document.getElementById('ring-green').setAttribute('stroke-dasharray', green + ' ' + (circ - green));
+  document.getElementById('ring-red').setAttribute('stroke-dasharray', red + ' ' + (circ - red));
+  document.getElementById('ring-red').setAttribute('stroke-dashoffset', -green);
+  document.getElementById('winrate-label').textContent = parseFloat(pct).toFixed(1) + '%';
+}
+
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderCalendar() {
+  document.getElementById('month-label').textContent = MONTHS[viewMonth] + ' ' + viewYear;
+  document.getElementById('cal-headers').innerHTML = DAYS.map(d => '<div class="cal-day-header">' + d + '</div>').join('');
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    const d = i - firstDay + 1;
+    if (d < 1 || d > daysInMonth) {
+      html += '<div class="cal-day empty" style="border-bottom:none;"></div>';
+      continue;
+    }
+    const key = viewYear + '-' + String(viewMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const entry = state.journal[key];
+    const isToday = d === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear();
+    const colorClass = entry && entry.color ? ' day-' + entry.color : '';
+    const preview = entry && entry.text ? stripHtml(entry.text).slice(0, 40) : '';
+    const dayNum = (entry && entry.dayNumber !== undefined && entry.dayNumber !== '') ? entry.dayNumber : null;
+    const isLastRow = i >= totalCells - 7;
+    html += '<div class="cal-day' + (isToday ? ' today' : '') + colorClass + '"'
+      + (isLastRow ? ' style="border-bottom:none;"' : '')
+      + ' onclick="openEntry(\'' + key + '\',' + d + ')">' 
+      + '<div class="cal-day-num">' + d + '</div>'
+      + (preview ? '<div class="cal-day-preview">' + preview + '</div>' : '')
+      + (dayNum !== null ? '<div class="cal-day-number">' + (parseFloat(dayNum) >= 0 ? '+' : '') + Number(dayNum).toLocaleString('en-US', {maximumFractionDigits:2}) + '</div>' : '')
+      + '</div>';
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+function changeMonth(dir) {
+  viewMonth += dir;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  renderCalendar();
+}
+
+function setDayColor(color) {
+  document.getElementById('btn-green').classList.remove('active');
+  document.getElementById('btn-red').classList.remove('active');
+  if (color === 'green') document.getElementById('btn-green').classList.add('active');
+  if (color === 'red') document.getElementById('btn-red').classList.add('active');
+  window._currentDayColor = color;
+}
+
+function openEntry(key, day) {
+  currentEntryKey = key;
+  const entry = state.journal[key] || { text:'', images:[], color: null, dayNumber: '' };
+  const dateObj = new Date(viewYear, viewMonth, day);
+  document.getElementById('entry-title').textContent = dateObj.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  document.getElementById('entry-editor').innerHTML = entry.text || '';
+  document.getElementById('save-status').textContent = '';
+  document.getElementById('save-status').className = 'save-status';
+  document.getElementById('day-number-input').value = entry.dayNumber !== undefined ? entry.dayNumber : '';
+  window._currentDayColor = entry.color || null;
+  document.getElementById('btn-green').classList.toggle('active', entry.color === 'green');
+  document.getElementById('btn-red').classList.toggle('active', entry.color === 'red');
+  renderImages(entry.images || []);
+  document.getElementById('journal-view').style.display = 'none';
+  document.getElementById('entry-view').style.display = 'block';
+  document.getElementById('entry-view').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function closeEntry() {
+  currentEntryKey = null;
+  document.getElementById('journal-view').style.display = 'block';
+  document.getElementById('entry-view').style.display = 'none';
+  renderCalendar();
+}
+
+function saveEntry() {
+  if (!currentEntryKey) return;
+  if (!state.journal[currentEntryKey]) state.journal[currentEntryKey] = { text:'', images:[], color: null, dayNumber: '' };
+  state.journal[currentEntryKey].text = document.getElementById('entry-editor').innerHTML;
+  state.journal[currentEntryKey].color = window._currentDayColor || null;
+  state.journal[currentEntryKey].dayNumber = document.getElementById('day-number-input').value;
+  save();
+  const el = document.getElementById('save-status');
+  el.textContent = '✓ Saved'; el.className = 'save-status saved';
+  setTimeout(() => { el.textContent = ''; el.className = 'save-status'; }, 2500);
+}
+
+function formatText(cmd) { document.getElementById('entry-editor').focus(); document.execCommand(cmd, false, null); }
+
+function handleImages(event) { handleImageFiles(event.target.files); event.target.value = ''; }
+
+function handleImageFiles(files) {
+  if (!currentEntryKey) return;
+  if (!state.journal[currentEntryKey]) state.journal[currentEntryKey] = { text:'', images:[] };
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => { state.journal[currentEntryKey].images.push(e.target.result); save(); renderImages(state.journal[currentEntryKey].images); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderImages(images) {
+  const grid = document.getElementById('images-grid');
+  if (!images || !images.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = images.map((src, i) => '<div class="image-thumb"><img src="' + src + '" alt="Screenshot ' + (i+1) + '"><button class="img-delete" onclick="deleteImage(' + i + ')">X</button></div>').join('');
+}
+
+function deleteImage(idx) {
+  if (!currentEntryKey || !state.journal[currentEntryKey]) return;
+  state.journal[currentEntryKey].images.splice(idx, 1);
+  save(); renderImages(state.journal[currentEntryKey].images);
+}
+
+function stripHtml(html) { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || ''; }
+
+function addTrade(type) {
+  if (!state.wins) state.wins = 0;
+  if (!state.losses) state.losses = 0;
+  if (type === 'win') state.wins++;
+  else state.losses++;
+  state.trades = state.wins + state.losses;
+  const total = state.trades;
+  state.wr = total > 0 ? (state.wins / total) * 100 : 0;
+  renderDashboard();
+  save();
+}
+
+function resetTrades() {
+  state.wins = 0; state.losses = 0; state.trades = 0; state.wr = 0;
+  renderDashboard();
+  save();
+}
+
+function resetPF() {
+  state.pf = 0;
+  state.pfHistory = [];
+  renderDashboard();
+  renderPFHistory();
+  save();
+  showToast('Profit Factor reset');
+}
+
+function renderPFHistory() {
+  const el = document.getElementById('pf-history');
+  if (!el) return;
+  const h = state.pfHistory || [];
+  if (!h.length) { el.innerHTML = ''; return; }
+  el.innerHTML = h.map((v, i) =>
+    '<span class="pf-pill' + (i === 0 ? ' first' : '') + '">' + v.toFixed(2) + '</span>'
+  ).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.querySelectorAll('.stat-input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') setStat(inp.id.split('-')[0]); });
+});
+document.getElementById('balance-input').addEventListener('keydown', e => { if (e.key === 'Enter') adjustBalance(1); });
+
+// Init
+document.getElementById('sidebar-date').textContent = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+renderDashboard();
+renderPFHistory();
+renderCalendar();
+const zone = document.querySelector('.image-upload-zone');
+if (zone) {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'rgba(255,255,255,0.25)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = ''; handleImageFiles(e.dataTransfer.files); });
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
