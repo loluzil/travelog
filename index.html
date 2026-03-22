@@ -187,6 +187,9 @@
 </style>
 </head>
 <body>
+<div id="splash" style="position:fixed;inset:0;background:#090b10;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div id="splash-text" style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:6px;text-transform:uppercase;opacity:0;transform:scaleX(0.6);filter:blur(8px);transition:none;">foreign</div>
+</div>
 <div class="app">
   <aside class="sidebar">
     <div class="logo">
@@ -598,6 +601,31 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+</script>
+<script>
+(function() {
+  const txt = document.getElementById('splash-text');
+  const splash = document.getElementById('splash');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      txt.style.transition = 'opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1), filter 0.9s ease';
+      txt.style.opacity = '1';
+      txt.style.transform = 'scaleX(1)';
+      txt.style.filter = 'blur(0px)';
+      setTimeout(() => {
+        txt.style.transition = 'opacity 0.5s ease, filter 0.5s ease, letter-spacing 0.5s ease';
+        txt.style.opacity = '0';
+        txt.style.filter = 'blur(6px)';
+        txt.style.letterSpacing = '14px';
+        setTimeout(() => {
+          splash.style.transition = 'opacity 0.4s ease';
+          splash.style.opacity = '0';
+          setTimeout(() => { splash.style.display = 'none'; }, 400);
+        }, 500);
+      }, 1500);
+    });
+  });
+})();
 </script>
 </body>
 </html>
